@@ -1145,12 +1145,22 @@ static void transform_point(const lv_obj_t * obj, lv_point_t * p, bool inv)
     int16_t angle = lv_obj_get_style_transform_angle(obj, 0);
     int16_t zoom = lv_obj_get_style_transform_zoom(obj, 0);
 
-    if(angle == 0 && zoom == LV_IMG_ZOOM_NONE) return;
+    if(angle == 0 && zoom == LV_ZOOM_NONE) return;
 
-    lv_point_t pivot;
+    lv_point_t pivot = {
+        .x = lv_obj_get_style_transform_pivot_x(obj, 0),
+        .y = lv_obj_get_style_transform_pivot_y(obj, 0)
+    };
 
-    pivot.x = obj->coords.x1 + lv_obj_get_style_transform_pivot_x(obj, 0);
-    pivot.y = obj->coords.y1 + lv_obj_get_style_transform_pivot_y(obj, 0);
+    if(LV_COORD_IS_PCT(pivot.x)) {
+        pivot.x = (LV_COORD_GET_PCT(pivot.x) * lv_area_get_width(&obj->coords)) / 100;
+    }
+    if(LV_COORD_IS_PCT(pivot.y)) {
+        pivot.y = (LV_COORD_GET_PCT(pivot.y) * lv_area_get_height(&obj->coords)) / 100;
+    }
+
+    pivot.x = obj->coords.x1 + pivot.x;
+    pivot.y = obj->coords.y1 + pivot.y;
 
     if(inv) {
         angle = -angle;

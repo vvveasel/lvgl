@@ -15,6 +15,7 @@
 #include "../../core/lv_refr.h"
 #include "../../misc/lv_mem.h"
 #include "../../misc/lv_math.h"
+#include LV_COLOR_EXTERN_INCLUDE
 
 /*********************
  *      DEFINES
@@ -53,7 +54,7 @@ LV_ATTRIBUTE_FAST_MEM void lv_draw_sw_img_decoded(struct _lv_draw_ctx_t * draw_c
     lv_area_copy(&draw_area, draw_ctx->clip_area);
 
     bool mask_any = lv_draw_mask_is_any(&draw_area);
-    bool transform = draw_dsc->angle != 0 || draw_dsc->zoom != LV_IMG_ZOOM_NONE ? true : false;
+    bool transform = draw_dsc->angle != 0 || draw_dsc->zoom != LV_ZOOM_NONE ? true : false;
 
     lv_area_t blend_area;
     lv_draw_sw_blend_dsc_t blend_dsc;
@@ -133,7 +134,7 @@ LV_ATTRIBUTE_FAST_MEM void lv_draw_sw_img_decoded(struct _lv_draw_ctx_t * draw_c
         blend_area.y2 = blend_area.y1 + buf_h - 1;
 
         lv_draw_mask_res_t mask_res_def = (cf != LV_COLOR_FORMAT_NATIVE || draw_dsc->angle ||
-                                           draw_dsc->zoom != LV_IMG_ZOOM_NONE) ?
+                                           draw_dsc->zoom != LV_ZOOM_NONE) ?
                                           LV_DRAW_MASK_RES_CHANGED : LV_DRAW_MASK_RES_FULL_COVER;
         blend_dsc.mask_res = mask_res_def;
 
@@ -159,11 +160,11 @@ LV_ATTRIBUTE_FAST_MEM void lv_draw_sw_img_decoded(struct _lv_draw_ctx_t * draw_c
                 uint16_t premult_v[3];
                 lv_opa_t recolor_opa = draw_dsc->recolor_opa;
                 lv_color_t recolor = draw_dsc->recolor;
-                lv_color_premult(recolor, recolor_opa, premult_v);
+                LV_COLOR_PREMULT(recolor, recolor_opa, premult_v);
                 recolor_opa = 255 - recolor_opa;
                 uint32_t i;
                 for(i = 0; i < buf_size; i++) {
-                    rgb_buf[i] = lv_color_mix_premult(premult_v, rgb_buf[i], recolor_opa);
+                    rgb_buf[i] = LV_COLOR_MIX_PREMULT(premult_v, rgb_buf[i], recolor_opa);
                 }
             }
 #if LV_USE_DRAW_MASKS

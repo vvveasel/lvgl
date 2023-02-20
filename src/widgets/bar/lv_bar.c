@@ -496,6 +496,9 @@ static void draw_indic(lv_event_t * e)
     int16_t mask_indic_id = lv_draw_mask_add(&mask_indic_param, NULL);
 #endif
 
+    const lv_area_t * clip_area_ori = draw_ctx->clip_area;
+    draw_ctx->clip_area = &bar->indic_area;
+
     lv_draw_rect(draw_ctx, &draw_rect_dsc, &mask_indic_max_area);
     draw_rect_dsc.border_opa = border_opa;
     draw_rect_dsc.shadow_opa = shadow_opa;
@@ -514,6 +517,7 @@ static void draw_indic(lv_event_t * e)
 #endif
 
     lv_obj_send_event(obj, LV_EVENT_DRAW_PART_END, &part_draw_dsc);
+    draw_ctx->clip_area = clip_area_ori;
 }
 
 static void lv_bar_event(const lv_obj_class_t * class_p, lv_event_t * e)

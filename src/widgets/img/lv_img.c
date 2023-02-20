@@ -155,7 +155,7 @@ void lv_img_set_src(lv_obj_t * obj, const void * src)
     lv_obj_refresh_self_size(obj);
 
     /*Provide enough room for the rotated corners*/
-    if(img->angle || img->zoom != LV_IMG_ZOOM_NONE) lv_obj_refresh_ext_draw_size(obj);
+    if(img->angle || img->zoom != LV_ZOOM_NONE) lv_obj_refresh_ext_draw_size(obj);
 
     lv_obj_invalidate(obj);
 }
@@ -166,8 +166,6 @@ void lv_img_set_offset_x(lv_obj_t * obj, lv_coord_t x)
 
     lv_img_t * img = (lv_img_t *)obj;
 
-    x = x % img->w;
-
     img->offset.x = x;
     lv_obj_invalidate(obj);
 }
@@ -177,8 +175,6 @@ void lv_img_set_offset_y(lv_obj_t * obj, lv_coord_t y)
     LV_ASSERT_OBJ(obj, MY_CLASS);
 
     lv_img_t * img = (lv_img_t *)obj;
-
-    y = y % img->h;
 
     img->offset.y = y;
     lv_obj_invalidate(obj);
@@ -399,7 +395,7 @@ static void lv_img_constructor(const lv_obj_class_t * class_p, lv_obj_t * obj)
     img->w         = lv_obj_get_width(obj);
     img->h         = lv_obj_get_height(obj);
     img->angle = 0;
-    img->zoom = LV_IMG_ZOOM_NONE;
+    img->zoom = LV_ZOOM_NONE;
     img->antialias = LV_COLOR_DEPTH > 8 ? 1 : 0;
     img->offset.x  = 0;
     img->offset.y  = 0;
@@ -469,7 +465,7 @@ static void lv_img_event(const lv_obj_class_t * class_p, lv_event_t * e)
         lv_coord_t * s = lv_event_get_param(e);
 
         /*If the image has angle provide enough room for the rotated corners*/
-        if(img->angle || img->zoom != LV_IMG_ZOOM_NONE) {
+        if(img->angle || img->zoom != LV_ZOOM_NONE) {
             lv_area_t a;
             lv_coord_t w = lv_obj_get_width(obj);
             lv_coord_t h = lv_obj_get_height(obj);
@@ -486,7 +482,7 @@ static void lv_img_event(const lv_obj_class_t * class_p, lv_event_t * e)
         /*If the object is exactly image sized (not cropped, not mosaic) and transformed
          *perform hit test on its transformed area*/
         if(img->w == lv_obj_get_width(obj) && img->h == lv_obj_get_height(obj) &&
-           (img->zoom != LV_IMG_ZOOM_NONE || img->angle != 0 || img->pivot.x != img->w / 2 || img->pivot.y != img->h / 2)) {
+           (img->zoom != LV_ZOOM_NONE || img->angle != 0 || img->pivot.x != img->w / 2 || img->pivot.y != img->h / 2)) {
 
             lv_coord_t w = lv_obj_get_width(obj);
             lv_coord_t h = lv_obj_get_height(obj);
@@ -551,7 +547,7 @@ static void draw_img(lv_event_t * e)
         }
 
         const lv_area_t * clip_area = lv_event_get_param(e);
-        if(img->zoom == LV_IMG_ZOOM_NONE) {
+        if(img->zoom == LV_ZOOM_NONE) {
             if(_lv_area_is_in(clip_area, &obj->coords, 0) == false) {
                 info->res = LV_COVER_RES_NOT_COVER;
                 return;
@@ -660,12 +656,14 @@ static void draw_img(lv_event_t * e)
                 draw_ctx->clip_area = &img_clip_area;
 
                 lv_area_t coords_tmp;
-                coords_tmp.y1 = img_max_area.y1 + img->offset.y;
+                lv_coord_t offset_x = img->offset.x % img->w;
+                lv_coord_t offset_y = img->offset.y % img->h;
+                coords_tmp.y1 = img_max_area.y1 + offset_y;
                 if(coords_tmp.y1 > img_max_area.y1) coords_tmp.y1 -= img->h;
                 coords_tmp.y2 = coords_tmp.y1 + img->h - 1;
 
                 for(; coords_tmp.y1 < img_max_area.y2; coords_tmp.y1 += img_size_final.y, coords_tmp.y2 += img_size_final.y) {
-                    coords_tmp.x1 = img_max_area.x1 + img->offset.x;
+                    coords_tmp.x1 = img_max_area.x1 + offset_x;
                     if(coords_tmp.x1 > img_max_area.x1) coords_tmp.x1 -= img->w;
                     coords_tmp.x2 = coords_tmp.x1 + img->w - 1;
 

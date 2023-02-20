@@ -646,6 +646,8 @@ static void refr_area_part(lv_draw_ctx_t * draw_ctx)
         }
     }
 
+    if(draw_ctx->init_buf) draw_ctx->init_buf(draw_ctx);
+
     /*If the screen is transparent initialize it when the flushing is ready*/
     if(lv_color_format_has_alpha(disp_refr->color_format)) {
         if(draw_ctx->buffer_clear) draw_ctx->buffer_clear(draw_ctx);
@@ -897,6 +899,13 @@ void refr_obj(lv_draw_ctx_t * draw_ctx, lv_obj_t * obj)
             .x = lv_obj_get_style_transform_pivot_x(obj, 0),
             .y = lv_obj_get_style_transform_pivot_y(obj, 0)
         };
+
+        if(LV_COORD_IS_PCT(pivot.x)) {
+            pivot.x = (LV_COORD_GET_PCT(pivot.x) * lv_area_get_width(&obj->coords)) / 100;
+        }
+        if(LV_COORD_IS_PCT(pivot.y)) {
+            pivot.y = (LV_COORD_GET_PCT(pivot.y) * lv_area_get_height(&obj->coords)) / 100;
+        }
 
         lv_draw_img_dsc_t draw_dsc;
         lv_draw_img_dsc_init(&draw_dsc);
